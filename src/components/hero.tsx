@@ -1,10 +1,13 @@
 "use client"
 
 import { useEffect, useRef } from "react";
-import { Fn, instancedArray, instanceIndex, uniform, vec2, hash, vec3, float, color, smoothstep, uv } from "three/tsl";
+import { Fn, instancedArray, instanceIndex, uniform, vec2, hash, vec3, float, color, smoothstep, uv, min, PI2, cos, sin } from "three/tsl";
 import * as THREE from "three/webgpu";
 
 const NUM_PARTICLES = 50000;
+const NUM_ARMS = 5;
+const TWIST = 6.0;
+const ARM_WIDTH = 0.08;
 
 const Hero = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -42,9 +45,20 @@ const Hero = () => {
         const i = instanceIndex;
         const p = positions.element(i);
 
-        const rx = hash(i);
-        const ry = hash(i.add(NUM_PARTICLES));
-        p.assign(vec2(rx.mul(2).sub(1).mul(bounds.x), ry.mul(2).sub(1).mul(bounds.y)));
+        const arm = float(i.mod(NUM_ARMS));
+        const t = hash(i);
+
+        const maxRadius = min(bounds.x, bounds.y).mul(0.9);
+        const radius = t.mul(maxRadius);
+
+        const angle = arm.mul(PI2.div(NUM_ARMS)).add(t.mul(TWIST));
+
+        const randomDisplacement = vec2(
+          hash(i.add(NUM_PARTICLES)).sub(0.5),
+          hash(i.add(NUM_PARTICLES * 2)).sub(0.5),
+        ).mul(ARM_WIDTH).mul(t.mul(0.8).add(0.2));
+
+        p.assign(vec2(cos(angle), sin(angle)).mul(radius).add(randomDisplacement));
       })().compute(NUM_PARTICLES);
 
       const material = new THREE.SpriteNodeMaterial({ transparent: true, depthWrite: false });
