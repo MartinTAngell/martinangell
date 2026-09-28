@@ -4,19 +4,36 @@ import { useEffect, useRef } from "react";
 import { Fn, instancedArray, instanceIndex, uniform, vec2, hash, vec3, float, color, smoothstep, uv, min, PI2, cos, sin } from "three/tsl";
 import * as THREE from "three/webgpu";
 import Nav from "./nav";
+import { Instrument_Serif, Inter } from "next/font/google";
+
+const QUOTE_DELAY = 2;
+const QUOTE_STAGGER = 0.5;
 
 const NUM_PARTICLES = 50000;
 const NUM_ARMS = 5;
 const TWIST = 6.0;
 const ARM_WIDTH = 0.08;
-
-const INTRO_DURATION = 2.0;
+const SPAWN_TIME = 6.0;
+const SPAWN_DURATION = 2.0;
 const EDGE = 0.08;
+
+const instrument_serif = Instrument_Serif({
+  weight: "400",
+  subsets: ["latin"]
+});
+
+const inter = Inter({
+  weight: "400",
+  subsets: ["latin"]
+})
+
+const quoteElements = ["Through design.", "Composition.", "Balance.", "Light.", "And harmony."];
 
 const Hero = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const mountTime = performance.now();
     const container = containerRef.current;
     if (!container) return;
 
@@ -96,12 +113,12 @@ const Hero = () => {
       };
       window.addEventListener('resize', onResize);
 
-      const start = performance.now();
       let introDone = false;
 
       renderer.setAnimationLoop(() => {
         if (!introDone) {
-          const p = Math.min((performance.now() - start) / 1000 / INTRO_DURATION, 1);
+          const elapsed = (performance.now() - mountTime) / 1000 - SPAWN_TIME;
+          const p = Math.min(Math.max(elapsed / SPAWN_DURATION, 0), 1);
           const eased = 1 - Math.pow(1 - p, 3);
           progress.value = eased * (1 + EDGE);
           if (p >= 1) {
@@ -126,7 +143,54 @@ const Hero = () => {
   return (
     <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
       <div ref={containerRef} style={{ position: "absolute", inset: 0 }} />
-      <Nav />
+      <div style={{
+        width: "100vw",
+        height: "100vh",
+        position: "absolute",
+        display: "flex",
+        flexDirection: "column"
+      }}>
+        <Nav />
+        <div style={{
+          width: "min(36rem, 42vw)",
+          marginLeft: "5vw",
+          paddingTop: "7rem"
+        }}>
+          <p style={{
+            fontSize: "clamp(3.5rem, 4.25vw, 4.5rem)",
+            lineHeight: "1",
+            letterSpacing: "-0.015em",
+            animationDelay: `0.4s`
+          }} className={`${instrument_serif.className} fade-in`}>
+            The challenge: <br />
+            <span
+              className="fade-in"
+              style={{ color: "#0EA5E9", animationDelay: "1.2s" }}>
+              bring order<br />to the whole.</span></p>
+          <div style={{
+            marginTop: "1rem",
+            fontSize: "0.95rem",
+            lineHeight: "1.65",
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+          }}
+            className={inter.className}>
+            {quoteElements.map((text, i) => (
+              <p key={i}
+                className="fade-in"
+                style={{ animationDelay: `${QUOTE_DELAY + i * QUOTE_STAGGER}s` }}>{text}</p>
+            ))}
+          </div>
+          <p style={{
+            marginTop: "0.5rem",
+            fontSize: "1rem",
+            lineHeight: "1.35",
+            color: "#BBCCC",
+            animationDelay: "5s"
+          }}
+            className={`${instrument_serif.className} fade-in`}>— Stephen Sondheim, <br /> <i>Sunday in the Park with George</i></p>
+        </div>
+      </div>
     </div >
   )
 }

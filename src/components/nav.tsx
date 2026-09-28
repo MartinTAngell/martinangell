@@ -12,20 +12,19 @@ const instrument_sans = Instrument_Sans({
 
 const links = ["About", "Projects", "Publications", "Rants", "Contact"];
 
-const NAME_DELAY = 2;
-const LINKS_DELAY = 2.8;
+const NAME_DELAY = 0;
+const LINKS_DELAY = 0.15;
 const ANIMATION_STAGGER = 0.10;
 
 const Nav = () => {
   return (
     <nav style={{
-      position: "absolute",
       inset: 0,
       display: "flex",
       justifyContent: "space-between",
-      top: 9,
+      top: 0,
       left: 0,
-      color: "white"
+      color: "white",
     }}>
       <h1 style={{
         padding: "1vh 2vw",
