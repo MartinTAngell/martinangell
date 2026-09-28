@@ -69,7 +69,7 @@ const Hero = () => {
         const arm = float(i.mod(NUM_ARMS));
         const t = hash(i);
 
-        const center = vec2(bounds.x.mul(0.4), 0);
+        const center = vec2(bounds.x.mul(0.2), 0);
 
         const maxRadius = min(bounds.x.mul(0.5), bounds.y).mul(0.9);
         const radius = t.mul(maxRadius);
@@ -91,7 +91,7 @@ const Hero = () => {
       const material = new THREE.SpriteNodeMaterial({ transparent: true, depthWrite: false });
       material.positionNode = vec3(positions.element(instanceIndex), 0);
       material.scaleNode = float(0.008).mul(reveal);
-      material.colorNode = color(0x66ccff);
+      material.colorNode = color(0x0EA5E9);
       const distance = uv().sub(0.5).length();
       material.opacityNode = float(1).sub(smoothstep(0.35, 0.5, distance));
 
@@ -153,7 +153,7 @@ const Hero = () => {
         <Nav />
         <div style={{
           width: "min(36rem, 42vw)",
-          marginLeft: "5vw",
+          marginLeft: "4vw",
           paddingTop: "7rem"
         }}>
           <p style={{
@@ -185,7 +185,6 @@ const Hero = () => {
             marginTop: "0.5rem",
             fontSize: "1rem",
             lineHeight: "1.35",
-            color: "#BBCCC",
             animationDelay: "5s"
           }}
             className={`${instrument_serif.className} fade-in`}>— Stephen Sondheim, <br /> <i>Sunday in the Park with George</i></p>

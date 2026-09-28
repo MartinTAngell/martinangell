@@ -27,7 +27,7 @@ const Nav = () => {
       color: "white",
     }}>
       <h1 style={{
-        padding: "1vh 2vw",
+        padding: "1vh 4vw",
         fontSize: "1.15rem",
         letterSpacing: "0.22em",
         userSelect: "none",
@@ -37,7 +37,7 @@ const Nav = () => {
       >MARTIN ANGELL</h1>
       <div style={{
         display: "flex",
-        padding: "1vh 5vw",
+        padding: "1vh 4vw",
         fontSize: "1.15rem",
         gap: "5rem",
         userSelect: "none"
