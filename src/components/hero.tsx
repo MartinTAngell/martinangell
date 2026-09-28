@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Fn, instancedArray, instanceIndex, uniform, vec2, hash, vec3, float, color, smoothstep, uv, min, PI2, cos, sin } from "three/tsl";
 import * as THREE from "three/webgpu";
 import Nav from "./nav";
