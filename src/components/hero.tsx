@@ -15,7 +15,6 @@ const EDGE = 0.08;
 
 const Hero = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -107,7 +106,6 @@ const Hero = () => {
           progress.value = eased * (1 + EDGE);
           if (p >= 1) {
             introDone = true;
-            setReady(true);
           }
         }
         renderer.render(scene, camera);
