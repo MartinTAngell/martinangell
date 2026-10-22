@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react";
-import { Fn, instancedArray, instanceIndex, uniform, vec2, hash, vec3, float, color, smoothstep, uv, PI2, cos, sin } from "three/tsl";
+import { Fn, instanceIndex, uniform, vec2, hash, vec3, float, color, smoothstep, uv, PI2, cos, sin } from "three/tsl";
 import * as THREE from "three/webgpu";
 import Nav from "./nav";
 
@@ -41,7 +41,7 @@ const Hero = () => {
     const aspectRatio = width / height;
 
     const renderer = new THREE.WebGPURenderer({ antialias: true });
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(width, height);
 
     let onResize: (() => void) | null = null;
@@ -62,15 +62,13 @@ const Hero = () => {
       const camera = new THREE.OrthographicCamera(-aspectRatio, aspectRatio, 1, -1, 0.1, 10);
       camera.position.z = 1;
 
-      const positions = instancedArray(NUM_PARTICLES, 'vec2');
       const layout = galaxyLayout(aspectRatio);
       const center = uniform(new THREE.Vector2(layout.x, layout.y));
       const maxRadius = uniform(layout.radius);
       const scale = uniform(layout.radius / FULL_RADIUS);
 
-      const spawnParticles = Fn(() => {
+      const galaxyPosition = Fn(() => {
         const i = instanceIndex;
-        const p = positions.element(i);
 
         const arm = float(i.mod(NUM_ARMS));
         const t = hash(i);
@@ -81,17 +79,17 @@ const Hero = () => {
         const randomDisplacement = vec2(
           hash(i.add(NUM_PARTICLES)).sub(0.5),
           hash(i.add(NUM_PARTICLES * 2)).sub(0.5),
-        ).mul(ARM_WIDTH).mul(t.mul(0.8).add(0.2));
+        ).mul(ARM_WIDTH).mul(scale).mul(t.mul(0.8).add(0.2));
 
-        p.assign(center.add(vec2(cos(angle), sin(angle)).mul(radius).add(randomDisplacement)));
-      })().compute(NUM_PARTICLES);
+        return center.add(vec2(cos(angle), sin(angle)).mul(radius).add(randomDisplacement));
+      });
 
       const t = hash(instanceIndex);
       const progress = uniform(reducedMotion ? 1 + EDGE : 0);
       const reveal = float(1).sub(smoothstep(progress.sub(EDGE), progress, t));
 
       const material = new THREE.SpriteNodeMaterial({ transparent: true, depthWrite: false });
-      material.positionNode = vec3(positions.element(instanceIndex), 0);
+      material.positionNode = vec3(galaxyPosition(), 0);
       material.scaleNode = float(0.008).mul(scale).mul(reveal);
       material.colorNode = color(0x0EA5E9);
       const distance = uv().sub(0.5).length();
@@ -102,7 +100,6 @@ const Hero = () => {
       particles.frustumCulled = false;
       scene.add(particles);
 
-      renderer.compute(spawnParticles);
 
       onResize = () => {
         const w = container.clientWidth;
@@ -115,7 +112,6 @@ const Hero = () => {
         center.value.set(next.x, next.y);
         maxRadius.value = next.radius;
         scale.value = next.radius / FULL_RADIUS;
-        renderer.compute(spawnParticles);
         renderer.setSize(w, h);
       };
       window.addEventListener('resize', onResize);
@@ -156,7 +152,7 @@ const Hero = () => {
       <div className="relative flex min-h-svh flex-col">
         <Nav />
         <main className="flex flex-1 flex-col px-[4vw] pb-12 portrait:justify-end landscape:justify-center landscape:max-w-[min(40rem,40vw)]">
-          <h1 className="fade-in font-serif text-6xl md:text-7x1 leading-none tracking-tight" style={{ animationDelay: "0.1s" }}>
+          <h1 className="fade-in font-serif text-6xl md:text-7xl leading-none tracking-tight" style={{ animationDelay: "0.1s" }}>
             Martin Angell
           </h1>
           <p className="fade-in mt-5 text-lg md:text-xl leading-relaxed text-fg/90" style={{ animationDelay: "0.3s" }}>
@@ -179,7 +175,7 @@ const Hero = () => {
               <p className="fade-in font-serif text-2xl leading-tight" style={{ animationDelay: `${QUOTE_DELAY}s` }}>
                 The challenge: <span className="italic text-accent">bring order to the whole.</span>
               </p>
-              <p className="mt-2 text-xs uppercase tracking-[0.2em] text-muted">
+              <p className="mt-2 text-xs uppercase tracking-[0.2em] text-accent-text">
                 {quoteElements.map((text, i) => (
                   <span key={i}
                     className="fade-in inline-block mr-2"
@@ -187,7 +183,7 @@ const Hero = () => {
                 ))}
               </p>
             </blockquote>
-            <figcaption className="fade-in mt-2 font-serif text-sm text-muted" style={{ animationDelay: `${QUOTE_DELAY + 1.1}s` }}>
+            <figcaption className="fade-in mt-2 font-serif text-sm text-accent-text" style={{ animationDelay: `${QUOTE_DELAY + 1.1}s` }}>
               Stephen Sondheim, <i>Sunday in the Park with George</i>
             </figcaption>
           </figure>

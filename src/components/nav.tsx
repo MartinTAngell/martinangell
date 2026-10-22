@@ -31,7 +31,7 @@ const Nav = () => {
         {links.map(({ label, href, target }, i) => (
           <Link key={href} href={href} target={target}
             aria-current={isActive(href) ? "page" : undefined}
-            className={`fade-in transition hover::text-fg 
+            className={`fade-in transition hover:text-fg 
               ${isActive(href) ? "text-fg underline decoration-accent decoration-2 underline-offset-8" : "text-accent-text"}`}
             style={{ animationDelay: `${LINKS_DELAY + i * ANIMATION_STAGGER}s` }}>
             {label}

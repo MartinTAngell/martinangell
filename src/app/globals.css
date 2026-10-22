@@ -12,7 +12,7 @@
 
 @theme inline {
   --font-sans: var(--font-inter), system-ui, sans-serif;
-  --font-mono: var(--font-instrument-sans), Georgia, serif;
+  --font-serif: var(--font-instrument-sans), Georgia, serif;
 }
 
 @keyframes fadeIn {
