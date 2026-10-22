@@ -4,7 +4,7 @@ import Link from "next/link";
 const About = () => {
   return (
     <div>
-      <p className="text-accent-text text-xs uppercase tracking-[0.2em]">ABOUT</p>
+      <p className="text-accent-text text-xs uppercase tracking-[0.2em]">About</p>
       <h1 className="font-serif text-6xl leading-none mt-3">Hi, I&apos;m Martin!</h1>
       <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 mt-8">
         <div className="lg:w-2/3">
