@@ -10,7 +10,7 @@ const instrument_sans = Instrument_Sans({
   subsets: ["latin"],
 });
 
-const links = ["About", "Projects", "Publications", "Rants", "Contact"];
+const links = ["About", "Publications", "Rants", "Contact"];
 
 const NAME_DELAY = 0;
 const LINKS_DELAY = 0.15;
@@ -43,7 +43,7 @@ const Nav = () => {
         userSelect: "none"
       }} className={instrument_sans.className}>
         {links.map((label, i) => (
-          <a key={label} className="fade-in" style={{ animationDelay: `${LINKS_DELAY + i * ANIMATION_STAGGER}s` }}>
+          <a key={label} href={`/${label.toLowerCase()}`} className="fade-in" style={{ animationDelay: `${LINKS_DELAY + i * ANIMATION_STAGGER}s` }}>
             {label}
           </a>
         ))}

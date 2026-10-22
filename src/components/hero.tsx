@@ -1,41 +1,39 @@
 "use client"
 
-import { useEffect, useRef } from "react";
-import { Fn, instancedArray, instanceIndex, uniform, vec2, hash, vec3, float, color, smoothstep, uv, min, PI2, cos, sin } from "three/tsl";
+import { useEffect, useRef, useState } from "react";
+import { Fn, instancedArray, instanceIndex, uniform, vec2, hash, vec3, float, color, smoothstep, uv, PI2, cos, sin } from "three/tsl";
 import * as THREE from "three/webgpu";
 import Nav from "./nav";
-import { Instrument_Serif, Inter } from "next/font/google";
 
-const QUOTE_DELAY = 2;
-const QUOTE_STAGGER = 0.5;
+const QUOTE_DELAY = 1.2;
+const QUOTE_STAGGER = 0.15;
 
 const NUM_PARTICLES = 50000;
 const NUM_ARMS = 5;
 const TWIST = 6.0;
 const ARM_WIDTH = 0.08;
-const SPAWN_TIME = 6.0;
+const SPAWN_TIME = 0.3;
 const SPAWN_DURATION = 2.0;
 const EDGE = 0.08;
 
-const instrument_serif = Instrument_Serif({
-  weight: "400",
-  subsets: ["latin"]
-});
-
-const inter = Inter({
-  weight: "400",
-  subsets: ["latin"]
-})
-
 const quoteElements = ["Through design.", "Composition.", "Balance.", "Light.", "And harmony."];
+
+const FULL_RADIUS = 0.85;
+
+const galaxyLayout = (a: number) => a >= 1
+  ? { x: a * 0.3, y: 0, radius: Math.min(a * 0.5, 1) * FULL_RADIUS }
+  : { x: 0, y: 0.55, radius: Math.min(a * 0.7, 0.3) };
 
 const Hero = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     const mountTime = performance.now();
     const container = containerRef.current;
     if (!container) return;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     let disposed = false;
     const width = container.clientWidth;
@@ -49,7 +47,12 @@ const Hero = () => {
     let onResize: (() => void) | null = null;
 
     (async () => {
-      await renderer.init();
+      try {
+        await renderer.init();
+      } catch {
+        if (!disposed) setFailed(true);
+        return;
+      }
       if (disposed) return;
 
       container.appendChild(renderer.domElement);
@@ -60,7 +63,10 @@ const Hero = () => {
       camera.position.z = 1;
 
       const positions = instancedArray(NUM_PARTICLES, 'vec2');
-      const bounds = uniform(new THREE.Vector2(aspectRatio, 1));
+      const layout = galaxyLayout(aspectRatio);
+      const center = uniform(new THREE.Vector2(layout.x, layout.y));
+      const maxRadius = uniform(layout.radius);
+      const scale = uniform(layout.radius / FULL_RADIUS);
 
       const spawnParticles = Fn(() => {
         const i = instanceIndex;
@@ -69,11 +75,7 @@ const Hero = () => {
         const arm = float(i.mod(NUM_ARMS));
         const t = hash(i);
 
-        const center = vec2(bounds.x.mul(0.2), 0);
-
-        const maxRadius = min(bounds.x.mul(0.5), bounds.y).mul(0.9);
         const radius = t.mul(maxRadius);
-
         const angle = arm.mul(PI2.div(NUM_ARMS)).add(t.mul(TWIST));
 
         const randomDisplacement = vec2(
@@ -85,12 +87,12 @@ const Hero = () => {
       })().compute(NUM_PARTICLES);
 
       const t = hash(instanceIndex);
-      const progress = uniform(0);
+      const progress = uniform(reducedMotion ? 1 + EDGE : 0);
       const reveal = float(1).sub(smoothstep(progress.sub(EDGE), progress, t));
 
       const material = new THREE.SpriteNodeMaterial({ transparent: true, depthWrite: false });
       material.positionNode = vec3(positions.element(instanceIndex), 0);
-      material.scaleNode = float(0.008).mul(reveal);
+      material.scaleNode = float(0.008).mul(scale).mul(reveal);
       material.colorNode = color(0x0EA5E9);
       const distance = uv().sub(0.5).length();
       material.opacityNode = float(1).sub(smoothstep(0.35, 0.5, distance));
@@ -106,14 +108,19 @@ const Hero = () => {
         const w = container.clientWidth;
         const h = container.clientHeight;
         const a = w / h;
-        camera.left = -a; camera.right = a;
+        camera.left = -a;
+        camera.right = a;
         camera.updateProjectionMatrix();
-        bounds.value.set(a, 1);
+        const next = galaxyLayout(a);
+        center.value.set(next.x, next.y);
+        maxRadius.value = next.radius;
+        scale.value = next.radius / FULL_RADIUS;
+        renderer.compute(spawnParticles);
         renderer.setSize(w, h);
       };
       window.addEventListener('resize', onResize);
 
-      let introDone = false;
+      let introDone = reducedMotion;
 
       renderer.setAnimationLoop(() => {
         if (!introDone) {
@@ -141,56 +148,52 @@ const Hero = () => {
   }, []);
 
   return (
-    <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
-      <div ref={containerRef} style={{ position: "absolute", inset: 0 }} />
-      <div style={{
-        width: "100vw",
-        height: "100vh",
-        position: "absolute",
-        display: "flex",
-        flexDirection: "column"
-      }}>
+    <div className="relative w-full min-h-svh overflow-hidden">
+      <div ref={containerRef} className="absolute inset-0" />
+      {failed && (
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(14,165,233,0.25),transparent_45%)]" />
+      )}
+      <div className="relative flex min-h-svh flex-col">
         <Nav />
-        <div style={{
-          width: "min(36rem, 42vw)",
-          marginLeft: "4vw",
-          paddingTop: "7rem"
-        }}>
-          <p style={{
-            fontSize: "clamp(3.5rem, 4.25vw, 4.5rem)",
-            lineHeight: "1",
-            letterSpacing: "-0.015em",
-            animationDelay: `0.4s`
-          }} className={`${instrument_serif.className} fade-in`}>
-            The challenge: <br />
-            <span
-              className="fade-in"
-              style={{ color: "#0EA5E9", animationDelay: "1.2s" }}>
-              bring order<br />to the whole.</span></p>
-          <div style={{
-            marginTop: "1rem",
-            fontSize: "0.95rem",
-            lineHeight: "1.65",
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-          }}
-            className={inter.className}>
-            {quoteElements.map((text, i) => (
-              <p key={i}
-                className="fade-in"
-                style={{ animationDelay: `${QUOTE_DELAY + i * QUOTE_STAGGER}s` }}>{text}</p>
-            ))}
+        <main className="flex flex-1 flex-col px-[4vw] pb-12 portrait:justify-end landscape:justify-center landscape:max-w-[min(40rem,40vw)]">
+          <h1 className="fade-in font-serif text-6xl md:text-7x1 leading-none tracking-tight" style={{ animationDelay: "0.1s" }}>
+            Martin Angell
+          </h1>
+          <p className="fade-in mt-5 text-lg md:text-xl leading-relaxed text-fg/90" style={{ animationDelay: "0.3s" }}>
+            Undergraduate computer graphics researcher driven by making virtual worlds that realistically mirror ours.
+          </p>
+          <p className="fade-in mt-3 text-sm text-accent-text" style={{ animationDelay: "0.45s" }}>
+            Computer Science and Mathematics at NYU Courant, Class of 2027
+          </p>
+          <div className="fade-in mt-7 flex flex-wrap gap-3" style={{ animationDelay: "0.6s" }}>
+            <a href="/about" className="rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-bg transition hover:bg-accent-soft">
+              About me
+            </a>
+            <a href="/resume" target="_blank" rel="noopener noreferrer" className="rounded-full border border-fg/30 px-5 py-2.5 text-sm font-medium transition hover:border-fg">
+              Resume
+            </a>
           </div>
-          <p style={{
-            marginTop: "0.5rem",
-            fontSize: "1rem",
-            lineHeight: "1.35",
-            animationDelay: "5s"
-          }}
-            className={`${instrument_serif.className} fade-in`}>— Stephen Sondheim, <br /> <i>Sunday in the Park with George</i></p>
-        </div>
-      </div>
-    </div >
+
+          <figure className="mt-12 border-l border-dg pl-5">
+            <blockquote>
+              <p className="fade-in font-serif text-2xl leading-tight" style={{ animationDelay: `${QUOTE_DELAY}s` }}>
+                The challenge: <span className="italic text-accent">bring order to the whole.</span>
+              </p>
+              <p className="mt-2 text-xs uppercase tracking-[0.2em] text-muted">
+                {quoteElements.map((text, i) => (
+                  <span key={i}
+                    className="fade-in inline-block mr-2"
+                    style={{ animationDelay: `${QUOTE_DELAY + 0.2 + i * QUOTE_STAGGER}s` }}>{text}</span>
+                ))}
+              </p>
+            </blockquote>
+            <figcaption className="fade-in mt-2 font-serif text-sm text-muted" style={{ animationDelay: `${QUOTE_DELAY + 1.1}s` }}>
+              Stephen Sondheim, <i>Sunday in the Park with George</i>
+            </figcaption>
+          </figure>
+        </main>
+      </div >
+    </div>
   )
 }
 
