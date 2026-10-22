@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Instrument_Serif } from "next/font/google";
 import "./globals.css";
+import Nav from "@/components/nav";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -27,6 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${instrumentSerif.variable}`}>
       <body className="bg-bg text-fg font-sans antialiased">
+        <Nav />
         {children}
       </body>
     </html>

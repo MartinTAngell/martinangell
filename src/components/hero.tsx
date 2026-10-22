@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Fn, instanceIndex, uniform, vec2, hash, vec3, float, color, smoothstep, uv, PI2, cos, sin } from "three/tsl";
 import * as THREE from "three/webgpu";
-import Nav from "./nav";
 
 const QUOTE_DELAY = 1.2;
 const QUOTE_STAGGER = 0.15;
@@ -150,8 +149,7 @@ const Hero = () => {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(14,165,233,0.25),transparent_45%)]" />
       )}
       <div className="relative flex min-h-svh flex-col">
-        <Nav />
-        <main className="flex flex-1 flex-col px-[4vw] pb-12 portrait:justify-end landscape:justify-center landscape:max-w-[min(40rem,40vw)]">
+        <main className="flex flex-1 flex-col px-[4vw] pt-20 pb-12 portrait:justify-end landscape:justify-center landscape:max-w-[min(40rem,40vw)]">
           <h1 className="fade-in font-serif text-6xl md:text-7xl leading-none tracking-tight" style={{ animationDelay: "0.1s" }}>
             Martin Angell
           </h1>

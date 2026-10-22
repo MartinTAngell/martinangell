@@ -23,7 +23,7 @@ const Nav = () => {
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   return (
-    <nav className="relative z-10 flex items-center justify-between px-[4vw] py-5">
+    <nav className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-[4vw] py-5">
       <Link href="/" className="fade-in text-sm tracking-[0.22em] select-none hover:text-accent transition">
         MARTIN ANGELL
       </Link>
