@@ -3,7 +3,7 @@ export default function PagesLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <div className="flex min-h-svh flex-col">
-      <main className="w-full flex-1 max-w-[calc(64rem+8vw)] px-[4vw] pt-32">
+      <main className="mx-auto w-full flex-1 max-w-[calc(64rem+8vw)] px-[4vw] pt-32">
         {children}
       </main>
       <footer className="mt-24 border-t border-dg">
