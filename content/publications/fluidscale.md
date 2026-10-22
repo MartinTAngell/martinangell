@@ -1,6 +1,6 @@
 ---
 title: "FluidScale: A Machine Learning Model for Upscaling Screen-Space Fluids for Games"
-authors: ["Martin Angell", "Matias Artiz", "Gizem Kayar"]
+authors: ["Martin Angell", "Matias Ortiz", "Gizem Kayar"]
 venue: "In preparation for SIGGRAPH 2027"
 year: 2027
 status: "In preparation"
