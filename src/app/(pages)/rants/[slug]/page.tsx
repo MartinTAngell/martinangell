@@ -20,6 +20,22 @@ function youtubeId(src: string) {
   return m?.[1] ?? null;
 }
 
+function youtubeParams(src: string) {
+  const seconds = (v: string | null) => {
+    if (!v) return null;
+    const m = v.match(/^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s?)?$/);
+    if (!m) return null;
+    return (Number(m[1] ?? 0) * 3600 + Number(m[2] ?? 0) * 60 + Number(m[3] ?? 0)) || null;
+  };
+  const q = new URLSearchParams(src.split("?")[1] ?? "");
+  const start = seconds(q.get("start") ?? q.get("t"));
+  const end = seconds(q.get("end"));
+  const out = new URLSearchParams();
+  if (start) out.set("start", String(start));
+  if (end) out.set("end", String(end));
+  const str = out.toString();
+  return str ? `?${str}` : "";
+}
 
 
 const Rant = async ({ params }: { params: Promise<{ slug: string }> }) => {
@@ -36,7 +52,7 @@ const Rant = async ({ params }: { params: Promise<{ slug: string }> }) => {
           {id ? (
             <div className="relative aspect-video overflow-hidden rounded-xl border border-dg bg-accent-bg">
               <iframe
-                src={`https://www.youtube-nocookie.com/embed/${id}`}
+                src={`https://www.youtube-nocookie.com/embed/${id}${youtubeParams(url)}`}
                 title={alt || "YouTube video"}
                 loading="lazy"
                 allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
