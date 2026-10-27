@@ -4,7 +4,8 @@ const nextConfig: NextConfig = {
   /* config options here */
   async rewrites() {
     return [
-      { source: '/resume', destination: '/resume.pdf'}
+      { source: '/resume', destination: '/resume.pdf'},
+      { source: '/learnsph', destination: '/publications/learnsph.pdf'}
     ]
   }
 };
